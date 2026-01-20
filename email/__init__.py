@@ -1,0 +1,1 @@
+# Email module for sending and templating

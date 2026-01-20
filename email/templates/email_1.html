@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduction - {{ company }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            border-bottom: 2px solid #0078d4;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .signature {
+            border-top: 1px solid #e1e1e1;
+            padding-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        .highlight {
+            color: #0078d4;
+            font-weight: 600;
+        }
+        .cta {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid #0078d4;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Hello {{ first_name }},</h2>
+    </div>
+    
+    <div class="content">
+        <p>I hope this email finds you well. My name is [Your Name], and I'm reaching out because I noticed your role as <span class="highlight">{{ role }}</span> at <span class="highlight">{{ company }}</span>.</p>
+        
+        <p>I wanted to connect with you because [specific reason related to their company/role]. Based on my research of {{ company }}, I believe there might be an opportunity for us to collaborate.</p>
+        
+        <div class="cta">
+            <p><strong>Here's what I'd like to discuss:</strong></p>
+            <ul>
+                <li>[Specific value proposition 1]</li>
+                <li>[Specific value proposition 2]</li>
+                <li>[Specific value proposition 3]</li>
+            </ul>
+        </div>
+        
+        <p>I understand you're likely busy, so I'll keep this brief. Would you be open to a quick 15-minute conversation next week to explore how we might be able to help {{ company }} [achieve specific goal]?</p>
+        
+        <p>I'm happy to work around your schedule. Please let me know if you'd be interested, and I'll send over some times that work.</p>
+        
+        <p>Best regards,</p>
+    </div>
+    
+    <div class="signature">
+        <p><strong>[Your Name]</strong><br>
+        [Your Title]<br>
+        [Your Company]<br>
+        [Your Phone] | [Your Email]<br>
+        [Your Website]</p>
+        
+        <p><em>P.S. I've done some research on {{ company }} and have a few specific ideas that might be relevant to your current initiatives. Happy to share them if you're interested.</em></p>
+    </div>
+</body>
+</html>

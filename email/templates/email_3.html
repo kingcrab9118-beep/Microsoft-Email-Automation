@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Follow-up - {{ company }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            border-bottom: 2px solid #dc3545;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .signature {
+            border-top: 1px solid #e1e1e1;
+            padding-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        .highlight {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        .final-offer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid #dc3545;
+            margin: 20px 0;
+        }
+        .respectful-close {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Hi {{ first_name }},</h2>
+    </div>
+    
+    <div class="content">
+        <p>I hope you're doing well. This will be my final email regarding the opportunity I mentioned for {{ company }}.</p>
+        
+        <p>I completely understand that timing isn't always right, and priorities can shift quickly in your role as {{ role }}. No worries at all if this isn't something you're focused on right now.</p>
+        
+        <div class="final-offer">
+            <p><strong>Before I close the loop, I wanted to offer one final resource:</strong></p>
+            <p>I've created a simple [resource/tool/guide] specifically for companies like {{ company }} that are [relevant situation/challenge]. It's completely free and might be useful even if we never work together.</p>
+            <p>Would you like me to send it over? It takes 2 minutes to read and has some actionable insights you could implement right away.</p>
+        </div>
+        
+        <p>If not, that's perfectly fine too. I'll stop reaching out and won't add you to any mailing lists or follow-up sequences.</p>
+        
+        <div class="respectful-close">
+            <p>I genuinely appreciate your time and wish you and the {{ company }} team continued success. If circumstances change in the future and you think there might be a fit, you have my contact information.</p>
+        </div>
+        
+        <p>Take care, {{ first_name }}.</p>
+        
+        <p>Best regards,</p>
+    </div>
+    
+    <div class="signature">
+        <p><strong>[Your Name]</strong><br>
+        [Your Title]<br>
+        [Your Company]<br>
+        [Your Phone] | [Your Email]<br>
+        [Your Website]</p>
+        
+        <p><em>P.S. If you know someone else at {{ company }} or in your network who might be interested in this type of solution, I'd be grateful for an introduction. But no pressure at all.</em></p>
+    </div>
+</body>
+</html>

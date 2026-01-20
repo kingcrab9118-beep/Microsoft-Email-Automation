@@ -1,0 +1,44 @@
+[Unit]
+Description=Microsoft 365 Email Automation System
+Documentation=https://github.com/your-org/email-automation
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=emailautomation
+Group=emailautomation
+WorkingDirectory=/home/emailautomation/email_automation
+Environment=PATH=/home/emailautomation/email_automation/venv/bin
+Environment=PYTHONPATH=/home/emailautomation/email_automation
+ExecStart=/home/emailautomation/email_automation/venv/bin/python main.py run
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=mixed
+KillSignal=SIGINT
+TimeoutStopSec=30
+Restart=always
+RestartSec=10
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/home/emailautomation/email_automation
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=email-automation
+
+[Install]
+WantedBy=multi-user.target
