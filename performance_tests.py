@@ -115,7 +115,7 @@ class PerformanceTester:
         """Test email template rendering performance"""
         print(f"Testing template rendering with {num_renders} renders...")
         
-        from email.template_engine import EmailTemplateEngine
+        from email_module.template_engine import EmailTemplateEngine
         template_engine = EmailTemplateEngine()
         
         # Test recipient

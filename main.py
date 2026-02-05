@@ -18,7 +18,7 @@ from scheduler.scheduler import SequenceScheduler
 from replies.reply_tracker import ReplyTracker
 from auth.graph_auth import GraphAuthenticator, GraphAPIClient
 from auth.validator import AuthenticationValidator
-from email.sender import EmailSender
+from email_module.sender import EmailSender
 from replies.reply_matcher import ReplyMatcher, SequenceStopper
 
 

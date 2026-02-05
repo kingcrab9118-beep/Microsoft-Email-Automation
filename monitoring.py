@@ -232,7 +232,7 @@ class HealthMonitor:
         """Check email system health"""
         try:
             # Validate email templates
-            from email.template_engine import EmailTemplateEngine
+            from email_module.template_engine import EmailTemplateEngine
             template_engine = EmailTemplateEngine()
             
             template_validation = template_engine.validate_all_templates()

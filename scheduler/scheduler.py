@@ -16,7 +16,7 @@ from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from config import Config
 from db.database import DatabaseManager
 from db.models import Recipient, EmailSequence, RecipientRepository, EmailSequenceRepository
-from email.sender import EmailSender
+from email_module.sender import EmailSender
 from utils.rate_limiter import AdaptiveRateLimiter
 
 

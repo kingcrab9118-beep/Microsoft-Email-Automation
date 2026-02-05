@@ -154,7 +154,7 @@ async def example_email_preview():
     print("\n=== Email Preview Example ===")
     
     try:
-        from email.template_engine import EmailTemplateEngine
+        from email_module.template_engine import EmailTemplateEngine
         
         template_engine = EmailTemplateEngine()
         

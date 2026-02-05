@@ -164,7 +164,7 @@ class IntegrationTester:
     async def test_email_templates(self) -> Dict[str, Any]:
         """Test email template system"""
         try:
-            from email.template_engine import EmailTemplateEngine
+            from email_module.template_engine import EmailTemplateEngine
             from db.models import Recipient
             
             template_engine = EmailTemplateEngine()
