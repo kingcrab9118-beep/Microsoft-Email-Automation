@@ -345,9 +345,12 @@ class SequenceStopper:
                 result['error'] = f'Recipient {reply_match.recipient_id} not found'
                 return result
             
-            # Cancel future emails
+            # Cancel future emails and mark all as replied
             cancelled_count = await self.sequence_repo.cancel_future_emails(reply_match.recipient_id)
             result['cancelled_emails'] = cancelled_count
+            
+            # Mark all email sequences as replied (including already sent ones)
+            await self.sequence_repo.mark_replied(reply_match.recipient_id)
             
             # Update recipient status
             await self.recipient_repo.update_status(reply_match.recipient_id, 'replied')

@@ -4,7 +4,9 @@ Handles email composition, sending, and tracking
 """
 
 import logging
-from typing import Dict, Any, Optional
+import base64
+from pathlib import Path
+from typing import Dict, Any, Optional, List
 from datetime import datetime
 
 from auth.graph_auth import GraphAPIClient
@@ -21,6 +23,9 @@ class EmailSender:
         self.graph_client = graph_client
         self.template_engine = EmailTemplateEngine()
         self.logger = logging.getLogger(__name__)
+        
+        # Path to logo file
+        self.logo_path = Path(__file__).parent / "templates" / "logo.png"
     
     async def send_email(self, recipient: Recipient, step: int, custom_variables: Dict[str, Any] = None) -> Dict[str, Any]:
         """Send personalized email to recipient"""
@@ -63,13 +68,16 @@ class EmailSender:
             }
     
     def _create_message_payload(self, recipient: Recipient, subject: str, html_content: str) -> Dict[str, Any]:
-        """Create Microsoft Graph API message payload"""
+        """Create Microsoft Graph API message payload with inline image"""
+        # Replace logo.png reference with Content ID reference
+        html_content_with_cid = html_content.replace('src="logo.png"', 'src="cid:logo"')
+        
         payload = {
             "message": {
                 "subject": subject,
                 "body": {
                     "contentType": "HTML",
-                    "content": html_content
+                    "content": html_content_with_cid
                 },
                 "toRecipients": [
                     {
@@ -82,15 +90,39 @@ class EmailSender:
                 "from": {
                     "emailAddress": {
                         "address": self.config.sender_email,
-                        "name": "[Your Name]"  # TODO: Make this configurable
+                        "name": "Bertram Veen"
                     }
                 },
                 "importance": "normal",
                 "isDeliveryReceiptRequested": False,
-                "isReadReceiptRequested": False
+                "isReadReceiptRequested": False,
+                "attachments": []
             },
             "saveToSentItems": True
         }
+        
+        # Add logo as inline attachment if it exists
+        if self.logo_path.exists():
+            try:
+                with open(self.logo_path, 'rb') as logo_file:
+                    logo_data = logo_file.read()
+                    logo_base64 = base64.b64encode(logo_data).decode('utf-8')
+                    
+                    inline_attachment = {
+                        "@odata.type": "#microsoft.graph.fileAttachment",
+                        "name": "logo.png",
+                        "contentType": "image/png",
+                        "contentBytes": logo_base64,
+                        "contentId": "logo",
+                        "isInline": True
+                    }
+                    
+                    payload["message"]["attachments"].append(inline_attachment)
+                    self.logger.debug("Added logo as inline attachment")
+            except Exception as e:
+                self.logger.warning(f"Failed to attach logo: {e}")
+        else:
+            self.logger.warning(f"Logo file not found at {self.logo_path}")
         
         return payload
     

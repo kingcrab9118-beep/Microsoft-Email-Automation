@@ -129,9 +129,9 @@ class GraphAuthenticator:
                 'Content-Type': 'application/json'
             }
             
-            # Test with a simple user profile call (works for both auth methods)
+            # Test with user-specific endpoint (works for client_credentials)
             response = requests.get(
-                f"{self.config.graph_api_base_url}/me",
+                f"{self.config.graph_api_base_url}/users/{self.config.sender_email}",
                 headers=headers,
                 timeout=10
             )
@@ -177,7 +177,7 @@ class GraphAuthenticator:
             # Test Mail.Send permission by checking if we can access mail settings
             try:
                 response = requests.get(
-                    f"{self.config.graph_api_base_url}/me/mailboxSettings",
+                    f"{self.config.graph_api_base_url}/users/{self.config.sender_email}/mailboxSettings",
                     headers=headers,
                     timeout=10
                 )
@@ -188,7 +188,7 @@ class GraphAuthenticator:
             # Test Mail.Read permission by checking if we can access messages
             try:
                 response = requests.get(
-                    f"{self.config.graph_api_base_url}/me/messages?$top=1",
+                    f"{self.config.graph_api_base_url}/users/{self.config.sender_email}/messages?$top=1",
                     headers=headers,
                     timeout=10
                 )
@@ -199,7 +199,7 @@ class GraphAuthenticator:
             # Test User.Read permission
             try:
                 response = requests.get(
-                    f"{self.config.graph_api_base_url}/me",
+                    f"{self.config.graph_api_base_url}/users/{self.config.sender_email}",
                     headers=headers,
                     timeout=10
                 )

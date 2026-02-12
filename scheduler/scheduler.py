@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, List, Optional
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.executors.asyncio import AsyncIOExecutor
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 
@@ -44,10 +44,10 @@ class SequenceScheduler:
         self.logger.info("Email sequence scheduler initialized")
     
     def _setup_scheduler(self):
-        """Configure APScheduler with persistence"""
-        # Job store configuration (using SQLite for persistence)
+        """Configure APScheduler with in-memory job store"""
+        # Job store configuration (using memory for compatibility with SQLite)
         jobstores = {
-            'default': SQLAlchemyJobStore(url=self.config.database_url, tablename='scheduler_jobs')
+            'default': MemoryJobStore()
         }
         
         # Executor configuration
@@ -107,6 +107,15 @@ class SequenceScheduler:
             'interval',
             minutes=1,
             id='process_due_emails',
+            replace_existing=True
+        )
+        
+        # Process pending recipients every minute
+        self.scheduler.add_job(
+            self.process_pending_recipients,
+            'interval',
+            minutes=1,
+            id='process_pending_recipients',
             replace_existing=True
         )
         
@@ -190,6 +199,24 @@ class SequenceScheduler:
         except Exception as e:
             self.logger.error(f"Error processing due emails: {e}")
     
+    async def process_pending_recipients(self):
+        """Process pending recipients and start their email sequences"""
+        try:
+            # Get all pending recipients
+            pending_recipients = await self.recipient_repo.get_all_by_status('pending')
+            
+            if not pending_recipients:
+                return
+            
+            self.logger.info(f"Processing {len(pending_recipients)} pending recipients")
+            
+            # Start sequence for each pending recipient
+            for recipient in pending_recipients:
+                await self.schedule_initial_email(recipient.id)
+            
+        except Exception as e:
+            self.logger.error(f"Error processing pending recipients: {e}")
+    
     async def _process_single_email(self, sequence: EmailSequence):
         """Process a single email sequence"""
         try:
@@ -206,8 +233,10 @@ class SequenceScheduler:
             
             # Check if recipient is still active (not replied or stopped)
             if recipient.status in ['replied', 'stopped']:
-                self.logger.info(f"Skipping email for recipient {recipient.id} (status: {recipient.status})")
+                self.logger.info(f"Skipping email for recipient {recipient.id} ({recipient.email}) - status: {recipient.status}")
                 return
+            
+            self.logger.info(f"Processing email step {sequence.step} for recipient {recipient.id} ({recipient.email})")
             
             # Send email
             if self.email_sender:
@@ -245,6 +274,14 @@ class SequenceScheduler:
         try:
             next_step = current_step + 1
             
+            # Check if next step already exists
+            query = "SELECT id FROM email_sequence WHERE recipient_id = ? AND step = ?"
+            existing = await self.db_manager.execute_query(query, (recipient_id, next_step))
+            
+            if existing:
+                self.logger.debug(f"Email sequence step {next_step} already exists for recipient {recipient_id}")
+                return
+            
             if next_step == 2:
                 # Schedule follow-up 1
                 delay_days = self.config.follow_up_1_delay_days
@@ -263,6 +300,9 @@ class SequenceScheduler:
         try:
             # Cancel in database
             cancelled_count = await self.sequence_repo.cancel_future_emails(recipient_id)
+            
+            # Mark all email sequences as replied (including already sent ones)
+            await self.sequence_repo.mark_replied(recipient_id)
             
             # Update recipient status
             await self.recipient_repo.update_status(recipient_id, 'replied')

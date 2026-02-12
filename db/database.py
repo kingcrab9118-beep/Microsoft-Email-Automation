@@ -50,11 +50,20 @@ class DatabaseManager:
         if self.db_path:
             Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
         
-        # Create connection
-        self._connection = await aiosqlite.connect(self.db_path or ':memory:')
+        # Create connection with timeout and WAL mode for better concurrency
+        self._connection = await aiosqlite.connect(
+            self.db_path or ':memory:',
+            timeout=30.0  # Increase timeout to 30 seconds
+        )
+        
+        # Enable WAL mode for better concurrent access
+        await self._connection.execute("PRAGMA journal_mode=WAL")
         
         # Enable foreign key constraints
         await self._connection.execute("PRAGMA foreign_keys = ON")
+        
+        # Set busy timeout
+        await self._connection.execute("PRAGMA busy_timeout = 30000")
         
         # Create schema if it doesn't exist
         await self._create_schema()

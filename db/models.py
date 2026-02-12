@@ -247,6 +247,58 @@ class RecipientRepository:
             ))
         
         return recipients
+    
+    async def update(self, recipient: Recipient) -> bool:
+        """Update existing recipient"""
+        if not recipient.validate():
+            raise ValueError("Invalid recipient data")
+        
+        if not recipient.id:
+            raise ValueError("Recipient ID is required for update")
+        
+        query = """
+        UPDATE recipients 
+        SET first_name = ?, company = ?, role = ?, email = ?, status = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+        """
+        params = (
+            recipient.first_name,
+            recipient.company,
+            recipient.role,
+            recipient.email,
+            recipient.status,
+            recipient.id
+        )
+        
+        try:
+            affected_rows = await self.db_manager.execute_update(query, params)
+            success = affected_rows > 0
+            
+            if success:
+                self.logger.info(f"Updated recipient {recipient.id} ({recipient.email})")
+            
+            return success
+            
+        except Exception as e:
+            self.logger.error(f"Failed to update recipient: {e}")
+            raise
+    
+    async def delete(self, recipient_id: int) -> bool:
+        """Delete recipient by ID"""
+        query = "DELETE FROM recipients WHERE id = ?"
+        
+        try:
+            affected_rows = await self.db_manager.execute_update(query, (recipient_id,))
+            success = affected_rows > 0
+            
+            if success:
+                self.logger.info(f"Deleted recipient {recipient_id}")
+            
+            return success
+            
+        except Exception as e:
+            self.logger.error(f"Failed to delete recipient: {e}")
+            raise
 
 
 class EmailSequenceRepository:
@@ -331,17 +383,17 @@ class EmailSequenceRepository:
         return success
     
     async def mark_replied(self, recipient_id: int) -> bool:
-        """Mark all future emails for recipient as replied"""
+        """Mark all emails for recipient as replied (both sent and unsent)"""
         query = """
         UPDATE email_sequence 
         SET replied = TRUE, updated_at = CURRENT_TIMESTAMP
-        WHERE recipient_id = ? AND sent_at IS NULL
+        WHERE recipient_id = ?
         """
         
         affected_rows = await self.db_manager.execute_update(query, (recipient_id,))
         
         if affected_rows > 0:
-            self.logger.info(f"Marked {affected_rows} future emails as replied for recipient {recipient_id}")
+            self.logger.info(f"Marked {affected_rows} emails as replied for recipient {recipient_id}")
         
         return affected_rows > 0
     

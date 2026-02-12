@@ -119,7 +119,7 @@ class ReplyTracker:
             # Query parameters
             params = {
                 '$filter': f"receivedDateTime ge {since_time}",
-                '$select': 'id,subject,from,toRecipients,receivedDateTime,conversationId,internetMessageId,inReplyTo',
+                '$select': 'id,subject,from,toRecipients,receivedDateTime,conversationId,internetMessageId',
                 '$orderby': 'receivedDateTime desc',
                 '$top': 100  # Limit to prevent overwhelming
             }
@@ -168,23 +168,14 @@ class ReplyTracker:
     async def _is_reply_message(self, message: Dict[str, Any]) -> bool:
         """Determine if a message is a reply to our emails"""
         try:
-            # Check 1: inReplyTo field
-            in_reply_to = message.get('inReplyTo')
-            if in_reply_to:
-                # Check if this is a reply to one of our sent messages
-                sequence = await self.sequence_repo.get_by_message_id(in_reply_to)
-                if sequence:
-                    self.logger.debug(f"Reply detected via inReplyTo field: {in_reply_to}")
-                    return True
-            
-            # Check 2: Subject line patterns
+            # Check 1: Subject line patterns (RE:, FW:, etc.)
             subject = message.get('subject', '')
             for pattern in self.reply_subject_patterns:
                 if re.match(pattern, subject, re.IGNORECASE):
                     self.logger.debug(f"Reply detected via subject pattern: {subject}")
                     return True
             
-            # Check 3: From address is a known recipient
+            # Check 2: From address is a known recipient
             from_address = self._extract_email_address(message.get('from', {}))
             if from_address and from_address in self.known_recipients:
                 self.logger.debug(f"Reply detected from known recipient: {from_address}")
@@ -205,15 +196,21 @@ class ReplyTracker:
             if not from_address:
                 return None
             
-            # Look up recipient ID
-            recipient_id = self.known_recipients.get(from_address.lower())
+            # Always check database first for most up-to-date information
+            recipient = await self.recipient_repo.get_by_email(from_address)
+            if recipient:
+                recipient_id = recipient.id
+                # Update cache with latest ID
+                self.known_recipients[from_address.lower()] = recipient_id
+                self.logger.debug(f"Found recipient {recipient_id} for email {from_address}")
+                return recipient_id
             
-            if not recipient_id:
-                # Try to find in database (in case cache is stale)
-                recipient = await self.recipient_repo.get_by_email(from_address)
-                if recipient:
-                    recipient_id = recipient.id
-                    self.known_recipients[from_address.lower()] = recipient_id
+            # If not found in database, check cache as fallback
+            recipient_id = self.known_recipients.get(from_address.lower())
+            if recipient_id:
+                self.logger.warning(f"Recipient {from_address} found in cache but not in database - cache may be stale")
+                # Refresh cache
+                await self.refresh_known_recipients()
             
             return recipient_id
             
@@ -304,7 +301,7 @@ class ReplyTracker:
             # Get recent messages from this sender
             params = {
                 '$filter': f"from/emailAddress/address eq '{recipient_email}'",
-                '$select': 'id,subject,from,receivedDateTime,inReplyTo',
+                '$select': 'id,subject,from,receivedDateTime,conversationId,internetMessageId',
                 '$orderby': 'receivedDateTime desc',
                 '$top': 10
             }
