@@ -21,14 +21,15 @@ class Recipient:
     role: str = ""
     email: str = ""
     status: str = "pending"  # pending, active, replied, stopped
+    initial_mail_date: Optional[datetime] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     
     def validate(self) -> bool:
         """Validate recipient data"""
         try:
-            # Check required fields
-            if not all([self.first_name, self.company, self.role, self.email]):
+            # Check required fields (role is optional)
+            if not all([self.first_name, self.company, self.email]):
                 return False
             
             # Validate email format
@@ -55,6 +56,7 @@ class Recipient:
             'role': self.role,
             'email': self.email,
             'status': self.status,
+            'initial_mail_date': self.initial_mail_date,
             'created_at': self.created_at,
             'updated_at': self.updated_at
         }
@@ -69,6 +71,7 @@ class Recipient:
             role=data.get('role', ''),
             email=data.get('email', ''),
             status=data.get('status', 'pending'),
+            initial_mail_date=data.get('initial_mail_date'),
             created_at=data.get('created_at'),
             updated_at=data.get('updated_at')
         )
@@ -150,15 +153,16 @@ class RecipientRepository:
             raise ValueError("Invalid recipient data")
         
         query = """
-        INSERT INTO recipients (first_name, company, role, email, status)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO recipients (first_name, company, role, email, status, initial_mail_date)
+        VALUES (?, ?, ?, ?, ?, ?)
         """
         params = (
             recipient.first_name,
             recipient.company,
             recipient.role,
             recipient.email,
-            recipient.status
+            recipient.status,
+            recipient.initial_mail_date
         )
         
         try:
@@ -185,7 +189,8 @@ class RecipientRepository:
                 email=row[4],
                 status=row[5],
                 created_at=row[6],
-                updated_at=row[7]
+                updated_at=row[7],
+                initial_mail_date=row[8] if len(row) > 8 else None
             )
         return None
     
@@ -204,7 +209,8 @@ class RecipientRepository:
                 email=row[4],
                 status=row[5],
                 created_at=row[6],
-                updated_at=row[7]
+                updated_at=row[7],
+                initial_mail_date=row[8] if len(row) > 8 else None
             )
         return None
     
@@ -243,7 +249,8 @@ class RecipientRepository:
                 email=row[4],
                 status=row[5],
                 created_at=row[6],
-                updated_at=row[7]
+                updated_at=row[7],
+                initial_mail_date=row[8] if len(row) > 8 else None
             ))
         
         return recipients
@@ -258,7 +265,7 @@ class RecipientRepository:
         
         query = """
         UPDATE recipients 
-        SET first_name = ?, company = ?, role = ?, email = ?, status = ?, updated_at = CURRENT_TIMESTAMP
+        SET first_name = ?, company = ?, role = ?, email = ?, status = ?, initial_mail_date = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
         """
         params = (
@@ -267,6 +274,7 @@ class RecipientRepository:
             recipient.role,
             recipient.email,
             recipient.status,
+            recipient.initial_mail_date,
             recipient.id
         )
         

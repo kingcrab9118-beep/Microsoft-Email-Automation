@@ -132,6 +132,11 @@ class DatabaseManager:
             1: """
             -- Initial schema version
             INSERT OR IGNORE INTO schema_version (version) VALUES (1);
+            """,
+            2: """
+            -- Add initial_mail_date column to recipients table
+            ALTER TABLE recipients ADD COLUMN initial_mail_date TIMESTAMP NULL;
+            INSERT OR IGNORE INTO schema_version (version) VALUES (2);
             """
         }
         

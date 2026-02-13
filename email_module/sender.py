@@ -25,7 +25,7 @@ class EmailSender:
         self.logger = logging.getLogger(__name__)
         
         # Path to logo file
-        self.logo_path = Path(__file__).parent / "templates" / "logo.png"
+        self.logo_path = Path(__file__).parent / "templates" / "TalentEmpowermentLogo.png"
     
     async def send_email(self, recipient: Recipient, step: int, custom_variables: Dict[str, Any] = None) -> Dict[str, Any]:
         """Send personalized email to recipient"""
@@ -69,8 +69,8 @@ class EmailSender:
     
     def _create_message_payload(self, recipient: Recipient, subject: str, html_content: str) -> Dict[str, Any]:
         """Create Microsoft Graph API message payload with inline image"""
-        # Replace logo.png reference with Content ID reference
-        html_content_with_cid = html_content.replace('src="logo.png"', 'src="cid:logo"')
+        # Replace TalentEmpowermentLogo.png reference with Content ID reference
+        html_content_with_cid = html_content.replace('src="TalentEmpowermentLogo.png"', 'src="cid:logo"')
         
         payload = {
             "message": {
@@ -110,7 +110,7 @@ class EmailSender:
                     
                     inline_attachment = {
                         "@odata.type": "#microsoft.graph.fileAttachment",
-                        "name": "logo.png",
+                        "name": "TalentEmpowermentLogo.png",
                         "contentType": "image/png",
                         "contentBytes": logo_base64,
                         "contentId": "logo",
