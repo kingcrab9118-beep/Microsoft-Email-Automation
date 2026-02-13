@@ -39,9 +39,9 @@ class EmailTemplateEngine:
         
         # Subject line templates
         self.subject_templates = {
-            1: "Quick question about {{ company }}",
-            2: "Following up - {{ company }} opportunity",
-            3: "Final follow-up - {{ company }}"
+            1: "{{ company }} x TalentEmpowerment | Samen geven we talent een podium",
+            2: "Re: {{ company }} x TE | Geef talent in jouw organisatie een podium",
+            3: "Re: {{ company }} x TE | Win-win-win"
         }
         
         self.logger.info(f"Email template engine initialized with templates from {self.templates_dir}")

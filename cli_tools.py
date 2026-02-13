@@ -54,6 +54,26 @@ async def bulk_add_recipients_from_csv(csv_file_path: str) -> Dict[str, Any]:
                         'email': row['email'].strip().lower()
                     }
                     
+                    # Handle initial_mail_date if present
+                    if 'initial_mail_date' in row and row['initial_mail_date'].strip():
+                        from datetime import datetime
+                        try:
+                            # Try to parse the date
+                            date_str = row['initial_mail_date'].strip()
+                            # Support multiple date formats
+                            for fmt in ['%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d', '%m/%d/%Y', '%d/%m/%Y']:
+                                try:
+                                    parsed_date = datetime.strptime(date_str, fmt)
+                                    # If only date (no time), set default time to 09:00:00
+                                    if fmt in ['%Y-%m-%d', '%m/%d/%Y', '%d/%m/%Y']:
+                                        parsed_date = parsed_date.replace(hour=9, minute=0, second=0)
+                                    recipient_data['initial_mail_date'] = parsed_date.strftime('%Y-%m-%d %H:%M:%S')
+                                    break
+                                except ValueError:
+                                    continue
+                        except Exception as e:
+                            print(f"⚠ Warning: Could not parse initial_mail_date '{row['initial_mail_date']}' for {recipient_data['email']}: {e}")
+                    
                     # Add recipient
                     success = await app.scheduler.add_recipient_to_sequence(recipient_data)
                     
@@ -184,25 +204,28 @@ def create_sample_csv(output_path: str = "sample_recipients.csv"):
             'first_name': 'John',
             'company': 'Acme Corporation',
             'role': 'CEO',
-            'email': 'john.doe@acme.com'
+            'email': 'john.doe@acme.com',
+            'initial_mail_date': '2026-02-20 09:00:00'
         },
         {
             'first_name': 'Jane',
             'company': 'Tech Solutions Inc',
             'role': 'VP of Sales',
-            'email': 'jane.smith@techsolutions.com'
+            'email': 'jane.smith@techsolutions.com',
+            'initial_mail_date': ''
         },
         {
             'first_name': 'Mike',
             'company': 'Global Industries',
             'role': 'Director of Marketing',
-            'email': 'mike.johnson@globalind.com'
+            'email': 'mike.johnson@globalind.com',
+            'initial_mail_date': '2026-02-25'
         }
     ]
     
     try:
         with open(output_path, 'w', newline='', encoding='utf-8') as csvfile:
-            fieldnames = ['first_name', 'company', 'role', 'email']
+            fieldnames = ['first_name', 'company', 'role', 'email', 'initial_mail_date']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             
             writer.writeheader()
@@ -212,6 +235,11 @@ def create_sample_csv(output_path: str = "sample_recipients.csv"):
         print(f"✓ Created sample CSV file: {output_path}")
         print("Edit this file with your recipient data, then use:")
         print(f"python cli_tools.py bulk-import {output_path}")
+        print("\nNote: initial_mail_date is optional. Supported formats:")
+        print("  - YYYY-MM-DD (e.g., 2026-02-20)")
+        print("  - YYYY-MM-DD HH:MM:SS (e.g., 2026-02-20 09:00:00)")
+        print("  - MM/DD/YYYY or DD/MM/YYYY")
+        print("  - Leave empty to send immediately")
         
         return True
         
