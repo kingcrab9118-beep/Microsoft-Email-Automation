@@ -53,6 +53,8 @@ class ReplyMatcher:
                 r'^Sv:\s*',
                 r'^VS:\s*',  # Danish
                 r'^Vs:\s*',
+                r'^Antw:\s*',  # Dutch
+                r'^antw:\s*',
                 r'^回复:\s*',  # Chinese
                 r'^答复:\s*',
                 r'^Répondre:\s*',  # French
@@ -70,6 +72,8 @@ class ReplyMatcher:
                 r'^fwd:\s*',
                 r'^WG:\s*',  # German
                 r'^Wg:\s*',
+                r'^Doorst:\s*',  # Dutch
+                r'^doorst:\s*',
                 r'^TR:\s*',  # Turkish
                 r'^Tr:\s*',
                 r'^转发:\s*', # Chinese
@@ -94,7 +98,10 @@ class ReplyMatcher:
             'automated response',
             'delivery failure',
             'undeliverable',
-            'mail delivery subsystem'
+            'mail delivery subsystem',
+            'afwezig',  # Dutch: absent
+            'buiten kantoor',  # Dutch: out of office
+            'automatisch antwoord',  # Dutch: automatic reply
         ]
         
         # Positive reply indicators
@@ -111,7 +118,13 @@ class ReplyMatcher:
             'phone',
             'discuss',
             'more information',
-            'details'
+            'details',
+            'dank je',  # Dutch: thank you (informal)
+            'dank u',  # Dutch: thank you (formal)
+            'bedankt',  # Dutch: thanks
+            'geïnteresseerd',  # Dutch: interested
+            'meer informatie',  # Dutch: more information
+            'afspraak',  # Dutch: appointment/meeting
         ]
         
         # Negative reply indicators  
@@ -125,7 +138,13 @@ class ReplyMatcher:
             'not the right time',
             'already have',
             'not looking',
-            'not a fit'
+            'not a fit',
+            'niet geïnteresseerd',  # Dutch: not interested
+            'geen interesse',  # Dutch: no interest
+            'verwijder me',  # Dutch: remove me
+            'afmelden',  # Dutch: unsubscribe
+            'stop met mailen',  # Dutch: stop emailing
+            'niet contacteren',  # Dutch: don't contact
         ]
         
         self.logger.info("Reply matcher initialized with comprehensive detection patterns")
